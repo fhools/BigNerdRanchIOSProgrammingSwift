@@ -10,10 +10,12 @@ import Foundation
 import UIKit
 class DrawView : UIView {
     var finishedLines = [Line]()
+    var linesInProgress = [NSValue:Line]()
     var currentLine : Line?
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.grayColor()
+        self.multipleTouchEnabled = true
         
     }
     required init(coder aDecoder: NSCoder) {
@@ -35,33 +37,36 @@ class DrawView : UIView {
             self.strokeLine(line)
         }
         
-        if let currentLine = currentLine? {
-            UIColor.redColor().set()
-            self.strokeLine(currentLine)
+        UIColor.redColor().set()
+        for (key,line) in linesInProgress {
+            self.strokeLine(line)
         }
+        
     }
     
     // MARK: Touches
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
-        var t = touches.anyObject() as UITouch
-        var location = t.locationInView(self)
-        currentLine = Line(begin: location, end: location)
-        println(currentLine)
+        for t in touches {
+            var touch = t as UITouch
+            var location = touch.locationInView(self)
+            var line = Line(begin: location, end: location)
+            linesInProgress[NSValue(nonretainedObject: touch)] = line
+        }
         self.setNeedsDisplay()
     }
-    
     override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
-        var t = touches.anyObject() as UITouch
-        var location = t.locationInView(self)
-        currentLine?.end = location
-        println(currentLine)
+        for t in touches {
+            var touch = t as UITouch
+            linesInProgress[NSValue(nonretainedObject: touch)]?.end = touch.locationInView(self)
+        }
         self.setNeedsDisplay()
     }
     
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
-        var t = touches.anyObject() as UITouch
-        currentLine?.end = t.locationInView(self)
-        finishedLines.append(currentLine!)
-        
+        for t in touches {
+            var touch = t as UITouch
+            finishedLines.append(linesInProgress[NSValue(nonretainedObject: touch)]!)
+            linesInProgress.removeValueForKey(NSValue(nonretainedObject: touch))
+        }
     }
 }
