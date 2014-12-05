@@ -12,12 +12,21 @@ class DrawView : UIView {
     var finishedLines = [Line]()
     var linesInProgress = [NSValue:Line]()
     var currentLine : Line?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.grayColor()
         self.multipleTouchEnabled = true
         
+        var tapRecognizer = UITapGestureRecognizer(target: self, action: "doubleTap:")
+        
+        tapRecognizer.numberOfTapsRequired = 2
+        tapRecognizer.delaysTouchesBegan = true
+        
+        self.addGestureRecognizer(tapRecognizer)
+        
     }
+    
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -42,6 +51,14 @@ class DrawView : UIView {
             self.strokeLine(line)
         }
         
+    }
+    
+    // MARK: Gestures
+    func doubleTap(gr: UIGestureRecognizer) {
+        println("Recognize double tap")
+        self.linesInProgress.removeAll(keepCapacity: false)
+        self.finishedLines.removeAll(keepCapacity: false)
+        self.setNeedsDisplay()
     }
     
     // MARK: Touches
