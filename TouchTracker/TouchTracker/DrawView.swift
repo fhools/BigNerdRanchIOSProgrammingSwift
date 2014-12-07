@@ -179,6 +179,7 @@ class DrawView : UIView , UIGestureRecognizerDelegate {
     }
     // MARK: Touches
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+        self.selectedLine = nil
         for t in touches {
             var touch = t as UITouch
             var location = touch.locationInView(self)
